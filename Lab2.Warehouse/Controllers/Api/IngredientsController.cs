@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Lab2.Warehouse.Entities;
-using Lab2.Warehouse.Entities.Mappings;
 using Lab2.Warehouse.Models;
 using Lab2.Warehouse.Repositories.Abstractions;
 

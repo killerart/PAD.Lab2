@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using Lab2.Warehouse.Entities.Mappings;
+using Lab2.Warehouse.Entities;
 using Lab2.Warehouse.Filters.ExceptionFilters;
 using Lab2.Warehouse.Repositories;
 using Lab2.Warehouse.Repositories.Abstractions;
