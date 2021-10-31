@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Lab2.Proxy {
+namespace Lab2.SmartProxy {
     public class Program {
         public static void Main(string[] args) {
             CreateHostBuilder(args).Build().Run();

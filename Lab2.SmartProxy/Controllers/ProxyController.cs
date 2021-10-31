@@ -4,54 +4,64 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Lab2.Proxy.LoadBalancer.Abstractions;
-using Microsoft.AspNetCore.Builder;
+using Lab2.SmartProxy.Proxy.LoadBalancer.Abstractions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Lab2.Proxy.Middlewares {
-    public class ProxyMiddleware {
-        private readonly RequestDelegate _nextMiddleware;
-        private readonly HttpClient      _httpClient;
-        private readonly ILoadBalancer   _loadBalancer;
+namespace Lab2.SmartProxy.Controllers {
+    public class ProxyController : ControllerBase, IDisposable {
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILoadBalancer      _loadBalancer;
 
-        public ProxyMiddleware(RequestDelegate nextMiddleware, IHttpClientFactory httpClientFactory, ILoadBalancer loadBalancer) {
-            _nextMiddleware = nextMiddleware;
-            _httpClient     = httpClientFactory.CreateClient("proxy");
-            _loadBalancer   = loadBalancer;
+        private HttpResponseMessage? _responseMessage;
+
+        public ProxyController(IHttpClientFactory httpClientFactory, ILoadBalancer loadBalancer) {
+            _httpClientFactory = httpClientFactory;
+            _loadBalancer      = loadBalancer;
         }
+        
+        public async Task<IActionResult> Index() {
+            int attempts = 0;
 
-        public async Task Invoke(HttpContext context) {
+            var httpClient           = _httpClientFactory.CreateClient("proxy");
+            var targetRequestMessage = CreateTargetMessage(HttpContext);
+
             retry:
-            var targetUri = GetTargetUri(context.Request);
-            if (targetUri is null) {
-                await _nextMiddleware(context);
-                return;
+            var targetUri = GetTargetUri(Request);
+            if (attempts >= _loadBalancer.Count * 2) {
+                return StatusCode(StatusCodes.Status502BadGateway);
             }
 
-            var targetRequestMessage = CreateTargetMessage(context, targetUri);
+            SetTargetUri(targetRequestMessage, targetUri);
+
             try {
-                using var responseMessage =
-                    await _httpClient.SendAsync(targetRequestMessage, context.RequestAborted);
+                _responseMessage = await httpClient.SendAsync(targetRequestMessage, HttpContext.RequestAborted);
 
-                context.Response.StatusCode = (int)responseMessage.StatusCode;
-                CopyFromTargetResponseHeaders(context, responseMessage);
+                Response.StatusCode = (int)_responseMessage.StatusCode;
+                CopyFromTargetResponseHeaders(HttpContext, _responseMessage);
 
-                if (responseMessage.StatusCode != HttpStatusCode.NotModified)
-                    await responseMessage.Content.CopyToAsync(context.Response.Body);
+                if (_responseMessage.StatusCode == HttpStatusCode.NotModified) {
+                    return StatusCode(Response.StatusCode);
+                }
+
+                return StatusCode(Response.StatusCode, await _responseMessage.Content.ReadAsStreamAsync(HttpContext.RequestAborted));
             } catch (HttpRequestException) {
+                attempts++;
                 goto retry;
             }
         }
 
-        private HttpRequestMessage CreateTargetMessage(HttpContext context, Uri targetUri) {
+        private HttpRequestMessage CreateTargetMessage(HttpContext context) {
             var requestMessage = new HttpRequestMessage();
             CopyFromOriginalRequestContentAndHeaders(context, requestMessage);
-
-            requestMessage.RequestUri   = targetUri;
-            requestMessage.Headers.Host = targetUri.Authority;
-            requestMessage.Method       = GetMethod(context.Request.Method);
+            requestMessage.Method = GetMethod(context.Request.Method);
 
             return requestMessage;
+        }
+
+        private void SetTargetUri(HttpRequestMessage requestMessage, Uri targetUri) {
+            requestMessage.RequestUri   = targetUri;
+            requestMessage.Headers.Host = targetUri.Authority;
         }
 
         private void CopyFromOriginalRequestContentAndHeaders(HttpContext context, HttpRequestMessage requestMessage) {
@@ -108,15 +118,24 @@ namespace Lab2.Proxy.Middlewares {
                    !HttpMethods.IsTrace(method);
         }
 
-        private Uri? GetTargetUri(HttpRequest request) {
+        private Uri GetTargetUri(HttpRequest request) {
             var host = _loadBalancer.GetNextWarehouse();
-            return host is not null ? new Uri($"{host}{request.Path}") : null;
+            return new Uri($"{host}{request.Path}");
         }
-    }
 
-    public static class ProxyMiddlewareExtension {
-        public static IApplicationBuilder UseProxy(this IApplicationBuilder app) {
-            return app.UseMiddleware<ProxyMiddleware>();
+        private void Dispose(bool disposing) {
+            if (disposing) {
+                _responseMessage?.Dispose();
+            }
+        }
+
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ProxyController() {
+            Dispose(false);
         }
     }
 }

@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lab2.Warehouse", "Lab2.Ware
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lab2.Shared", "Lab2.Shared\Lab2.Shared.csproj", "{6E912727-1B40-433F-8A39-EDD4B0B14D91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lab2.Proxy", "Lab2.Proxy\Lab2.Proxy.csproj", "{0B8ED4C6-85E1-4691-8C71-E8C5F36A9806}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lab2.SmartProxy", "Lab2.SmartProxy\Lab2.SmartProxy.csproj", "{0B8ED4C6-85E1-4691-8C71-E8C5F36A9806}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
