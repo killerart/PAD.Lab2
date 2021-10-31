@@ -26,8 +26,10 @@ namespace Lab2.Warehouse {
             MappingConfiguration.Global.Define<IngredientMapping>();
 
             var cassandraConnectionString = Configuration.GetConnectionString("Cassandra");
-            var cluster                   = Cluster.Builder().WithConnectionString(cassandraConnectionString).Build();
-            var session                   = cluster.Connect("pad");
+            var cluster = Cluster.Builder()
+                                 .WithConnectionString(cassandraConnectionString)
+                                 .Build();
+            var session = cluster.Connect("pad");
             services.TryAddSingleton(session);
             services.TryAddScoped(typeof(IRepository<>), typeof(CassandraRepository<>));
 

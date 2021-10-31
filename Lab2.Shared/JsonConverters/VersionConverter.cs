@@ -2,7 +2,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace VideoChat.Shared.JsonConverters {
+namespace Lab2.Shared.JsonConverters {
     public class VersionConverter : JsonConverter<Version> {
         public override Version Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
             try {

@@ -23,7 +23,8 @@ namespace Lab2.Warehouse.Repositories {
         }
 
         public async Task<TModel> GetByIdAsync(Guid id) {
-            var model = await _table.First(m => m.Id == id).ExecuteAsync();
+            var model = await _table.First(m => m.Id == id)
+                                    .ExecuteAsync();
             if (model == null) {
                 throw new RequestException($"{typeof(TModel).Name} with id = {id} not found", HttpStatusCode.NotFound);
             }
@@ -32,18 +33,24 @@ namespace Lab2.Warehouse.Repositories {
         }
 
         public async Task<TModel> InsertAsync(TModel model) {
-            await _table.Insert(model).ExecuteAsync();
+            await _table.Insert(model)
+                        .ExecuteAsync();
             return model;
         }
 
         public async Task UpdateByIdAsync(Guid id, Expression<Func<TModel, TModel>> updateExpression) {
             await GetByIdAsync(id);
-            await _table.Where(m => m.Id == id).Select(updateExpression).Update().ExecuteAsync();
+            await _table.Where(m => m.Id == id)
+                        .Select(updateExpression)
+                        .Update()
+                        .ExecuteAsync();
         }
 
         public async Task DeleteByIdAsync(Guid id) {
             await GetByIdAsync(id);
-            await _table.Where(m => m.Id == id).Delete().ExecuteAsync();
+            await _table.Where(m => m.Id == id)
+                        .Delete()
+                        .ExecuteAsync();
         }
     }
 }

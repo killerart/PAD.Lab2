@@ -2,8 +2,8 @@
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Lab2.Shared.JsonConverters;
 using Microsoft.Extensions.Caching.Distributed;
-using VideoChat.Shared.JsonConverters;
 
 namespace Lab2.Shared.Extensions {
     public static class DistributedCacheExtensions {

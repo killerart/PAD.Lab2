@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace VideoChat.Shared.JsonConverters {
+namespace Lab2.Shared.JsonConverters {
     public class DateConverter : JsonConverter<DateTime?> {
         public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
             return reader.GetDateTime().Date;

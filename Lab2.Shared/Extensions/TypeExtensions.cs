@@ -104,10 +104,9 @@ namespace Lab2.Shared.Extensions {
             return new SortedDictionary<TKey, T>(enumerable.ToDictionary(keySelector, equalityComparer));
         }
 
-        public static SortedDictionary<TKey, TElement> ToSortedDictionary<T, TKey, TElement>(
-            this IEnumerable<T> enumerable,
-            Func<T, TKey>       keySelector,
-            Func<T, TElement>   elementSelector) where TKey : notnull {
+        public static SortedDictionary<TKey, TElement> ToSortedDictionary<T, TKey, TElement>(this IEnumerable<T> enumerable,
+                                                                                             Func<T, TKey>       keySelector,
+                                                                                             Func<T, TElement>   elementSelector) where TKey : notnull {
             return new SortedDictionary<TKey, TElement>(enumerable.ToDictionary(keySelector, elementSelector));
         }
 
