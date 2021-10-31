@@ -1,3 +1,4 @@
+using System;
 using Cassandra;
 using Cassandra.Mapping;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +13,7 @@ using Lab2.Warehouse.Entities;
 using Lab2.Warehouse.Filters.ExceptionFilters;
 using Lab2.Warehouse.Repositories;
 using Lab2.Warehouse.Repositories.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Lab2.Warehouse {
     public class Startup {
@@ -42,8 +44,17 @@ namespace Lab2.Warehouse {
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger) {
             if (env.IsDevelopment()) {
+                app.Use(async (context, next) => {
+                    logger.LogDebug("[{Now}] {Method} {Scheme}://{Host}{Path}",
+                                    DateTime.Now,
+                                    context.Request.Method,
+                                    context.Request.Scheme,
+                                    context.Request.Host,
+                                    context.Request.Path);
+                    await next.Invoke();
+                });
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lab2.Warehouse v1"));
