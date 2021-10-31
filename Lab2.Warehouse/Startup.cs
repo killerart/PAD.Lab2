@@ -30,7 +30,7 @@ namespace Lab2.Warehouse {
                                  .WithConnectionString(cassandraConnectionString)
                                  .Build();
             var session = cluster.Connect("pad");
-            services.TryAddSingleton(session);
+            services.TryAddSingleton<ISession>(session);
             services.TryAddScoped(typeof(IRepository<>), typeof(CassandraRepository<>));
 
             services.AddControllers(options => { options.Filters.Add<RequestExceptionFilter>(); })
@@ -38,7 +38,6 @@ namespace Lab2.Warehouse {
                     .AddXmlSerializerFormatters()
                     .AddXmlDataContractSerializerFormatters();
 
-            services.AddResponseCaching();
             services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lab2.Warehouse", Version = "v1" }); });
         }
 
@@ -51,8 +50,6 @@ namespace Lab2.Warehouse {
             }
 
             app.UseHttpsRedirection();
-
-            app.UseResponseCaching();
 
             app.UseRouting();
 
