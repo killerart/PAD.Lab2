@@ -1,11 +1,11 @@
-using System.Net.Http;
+using Lab2.SmartProxy.Cache;
 using Lab2.SmartProxy.Proxy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using StackExchange.Redis;
 
 namespace Lab2.SmartProxy {
     public class Startup {
@@ -17,20 +17,13 @@ namespace Lab2.SmartProxy {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
-            services.AddControllers();
+            var cacheConfig       = Configuration.GetSection("Cache").Get<CacheConfig>();
+            var proxyCacheProfile = new CacheProfile { VaryByHeader = "Accept", Duration = cacheConfig.MaxAge };
+
+            services.AddControllers()
+                    .AddMvcOptions(options => options.CacheProfiles.Add("proxy", proxyCacheProfile));
             services.AddProxy(Configuration);
-
-            var redisConfig = Configuration.GetSection("Redis");
-            if (redisConfig.Exists())
-                services.AddStackExchangeRedisCache(options => {
-                    //options.Configuration = redisConfig["ConnectionString"];
-                    options.InstanceName                  = redisConfig["InstanceName"];
-                    options.ConfigurationOptions          = ConfigurationOptions.Parse(redisConfig["ConnectionString"]);
-                    options.ConfigurationOptions.Password = redisConfig["Password"];
-                });
-            else
-                services.AddDistributedMemoryCache();
-
+            services.AddDistributedCache(Configuration);
             services.AddDistributedResponseCaching();
         }
 
@@ -40,12 +33,9 @@ namespace Lab2.SmartProxy {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseDistributedResponseCaching();
-
             app.UseRouting();
-            app.UseEndpoints(endpoints => {
-                endpoints.MapFallbackToController("{*path}", "Index", "Proxy");
-            });
+            app.UseDistributedResponseCaching();
+            app.UseEndpoints(endpoints => { endpoints.MapFallbackToController("{*path}", "Index", "Proxy"); });
         }
     }
 }

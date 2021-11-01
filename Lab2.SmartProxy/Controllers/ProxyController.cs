@@ -19,78 +19,79 @@ namespace Lab2.SmartProxy.Controllers {
             _httpClientFactory = httpClientFactory;
             _loadBalancer      = loadBalancer;
         }
-        
-        public async Task<IActionResult> Index() {
-            int attempts = 0;
 
-            var httpClient           = _httpClientFactory.CreateClient("proxy");
-            var targetRequestMessage = CreateTargetMessage(HttpContext);
+        [ResponseCache(CacheProfileName = "proxy")]
+        public async Task<IActionResult> Index() {
+            var attempts   = 0;
+            var httpClient = _httpClientFactory.CreateClient("proxy");
 
             retry:
-            var targetUri = GetTargetUri(Request);
-            if (attempts >= _loadBalancer.Count * 2) {
-                return StatusCode(StatusCodes.Status502BadGateway);
-            }
-
-            SetTargetUri(targetRequestMessage, targetUri);
+            var targetRequestMessage = CreateProxyRequestMessage();
 
             try {
                 _responseMessage = await httpClient.SendAsync(targetRequestMessage, HttpContext.RequestAborted);
 
                 Response.StatusCode = (int)_responseMessage.StatusCode;
-                CopyFromTargetResponseHeaders(HttpContext, _responseMessage);
+                CopyResponseHeadersToResponse(_responseMessage);
 
                 if (_responseMessage.StatusCode == HttpStatusCode.NotModified) {
                     return StatusCode(Response.StatusCode);
                 }
 
-                return StatusCode(Response.StatusCode, await _responseMessage.Content.ReadAsStreamAsync(HttpContext.RequestAborted));
+                var stream = await _responseMessage.Content.ReadAsStreamAsync();
+                return StatusCode(Response.StatusCode, stream);
             } catch (HttpRequestException) {
                 attempts++;
+                if (attempts >= _loadBalancer.Count * 2) {
+                    return StatusCode(StatusCodes.Status502BadGateway);
+                }
+
                 goto retry;
             }
         }
 
-        private HttpRequestMessage CreateTargetMessage(HttpContext context) {
+        private HttpRequestMessage CreateProxyRequestMessage() {
+            var targetUri      = GetTargetUri(Request);
             var requestMessage = new HttpRequestMessage();
-            CopyFromOriginalRequestContentAndHeaders(context, requestMessage);
-            requestMessage.Method = GetMethod(context.Request.Method);
-
+            CopyContentAndHeadersFromRequest(requestMessage);
+            requestMessage.RequestUri   = targetUri;
+            requestMessage.Headers.Host = targetUri.Authority;
+            requestMessage.Method       = GetMethod(Request.Method);
             return requestMessage;
         }
 
-        private void SetTargetUri(HttpRequestMessage requestMessage, Uri targetUri) {
-            requestMessage.RequestUri   = targetUri;
-            requestMessage.Headers.Host = targetUri.Authority;
+        private Uri GetTargetUri(HttpRequest request) {
+            var host = _loadBalancer.GetNextWarehouse();
+            return new Uri($"{host}{request.Path}");
         }
 
-        private void CopyFromOriginalRequestContentAndHeaders(HttpContext context, HttpRequestMessage requestMessage) {
-            var requestMethod = context.Request.Method;
+        private void CopyContentAndHeadersFromRequest(HttpRequestMessage requestMessage) {
+            var requestMethod = Request.Method;
 
             HttpHeaders headers = requestMessage.Headers;
 
             if (MethodHasBody(requestMethod)) {
-                var streamContent = new StreamContent(context.Request.Body);
+                var streamContent = new StreamContent(Request.Body);
                 requestMessage.Content = streamContent;
 
                 headers = requestMessage.Content.Headers;
             }
 
-            foreach (var header in context.Request.Headers) {
+            foreach (var header in Request.Headers) {
                 headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
             }
         }
 
-        private void CopyFromTargetResponseHeaders(HttpContext context, HttpResponseMessage responseMessage) {
+        private void CopyResponseHeadersToResponse(HttpResponseMessage responseMessage) {
             foreach (var header in responseMessage.Headers) {
-                context.Response.Headers[header.Key] = header.Value.ToArray();
+                Response.Headers[header.Key] = header.Value.ToArray();
             }
 
             foreach (var header in responseMessage.Content.Headers) {
-                context.Response.Headers[header.Key] = header.Value.ToArray();
+                Response.Headers[header.Key] = header.Value.ToArray();
             }
 
-            context.Response.Headers.Remove("transfer-encoding");
+            Response.Headers.Remove("transfer-encoding");
         }
 
         private static HttpMethod GetMethod(string method) {
@@ -118,24 +119,8 @@ namespace Lab2.SmartProxy.Controllers {
                    !HttpMethods.IsTrace(method);
         }
 
-        private Uri GetTargetUri(HttpRequest request) {
-            var host = _loadBalancer.GetNextWarehouse();
-            return new Uri($"{host}{request.Path}");
-        }
-
-        private void Dispose(bool disposing) {
-            if (disposing) {
-                _responseMessage?.Dispose();
-            }
-        }
-
         public void Dispose() {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~ProxyController() {
-            Dispose(false);
+            _responseMessage?.Dispose();
         }
     }
 }
