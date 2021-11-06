@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Lab2.SmartProxy.Proxy.LoadBalancer.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Polly.CircuitBreaker;
 
 namespace Lab2.SmartProxy.Controllers {
     public class ProxyController : ControllerBase, IDisposable {
@@ -43,7 +44,7 @@ namespace Lab2.SmartProxy.Controllers {
 
                 var stream = await _responseMessage.Content.ReadAsStreamAsync();
                 return StatusCode(Response.StatusCode, stream);
-            } catch (HttpRequestException) {
+            } catch (Exception ex) when (ex is HttpRequestException or BrokenCircuitException) {
                 attempts++;
                 if (attempts >= _loadBalancer.Count * 2) {
                     return StatusCode(StatusCodes.Status502BadGateway);
