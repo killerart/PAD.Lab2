@@ -22,11 +22,14 @@ namespace Lab2.SmartProxy.Controllers {
 
         [ResponseCache(CacheProfileName = "proxy")]
         public async Task<IActionResult> Index() {
-            var attempts   = 0;
-            var httpClient = _httpClientFactory.CreateClient("proxy");
+            var attempts = 0;
 
             retry:
-            var targetRequestMessage = CreateProxyRequestMessage();
+            var host       = _loadBalancer.GetNextWarehouse();
+            var baseUri    = new Uri(host);
+            var httpClient = _httpClientFactory.CreateClient(host);
+
+            var targetRequestMessage = CreateProxyRequestMessage(baseUri);
 
             try {
                 _responseMessage = await httpClient.SendAsync(targetRequestMessage, HttpContext.RequestAborted);
@@ -50,19 +53,14 @@ namespace Lab2.SmartProxy.Controllers {
             }
         }
 
-        private HttpRequestMessage CreateProxyRequestMessage() {
-            var targetUri      = GetTargetUri(Request);
+        private HttpRequestMessage CreateProxyRequestMessage(Uri baseUri) {
+            var targetUri      = new Uri(baseUri, Request.Path);
             var requestMessage = new HttpRequestMessage();
             CopyContentAndHeadersFromRequest(requestMessage);
             requestMessage.RequestUri   = targetUri;
             requestMessage.Headers.Host = targetUri.Authority;
             requestMessage.Method       = GetMethod(Request.Method);
             return requestMessage;
-        }
-
-        private Uri GetTargetUri(HttpRequest request) {
-            var host = _loadBalancer.GetNextWarehouse();
-            return new Uri($"{host}{request.Path}");
         }
 
         private void CopyContentAndHeadersFromRequest(HttpRequestMessage requestMessage) {
