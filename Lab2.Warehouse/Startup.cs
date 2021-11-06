@@ -1,18 +1,10 @@
 using System;
-using Cassandra;
-using Cassandra.Mapping;
+using Lab2.Shared.ServiceInstaller.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
-using Lab2.Warehouse.Entities;
-using Lab2.Warehouse.Filters.ExceptionFilters;
-using Lab2.Warehouse.Repositories;
-using Lab2.Warehouse.Repositories.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace Lab2.Warehouse {
@@ -25,22 +17,7 @@ namespace Lab2.Warehouse {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
-            MappingConfiguration.Global.Define<IngredientMapping>();
-
-            var cassandraConnectionString = Configuration.GetConnectionString("Cassandra");
-            var cluster = Cluster.Builder()
-                                 .WithConnectionString(cassandraConnectionString)
-                                 .Build();
-            var session = cluster.Connect("pad");
-            services.TryAddSingleton<ISession>(session);
-            services.TryAddScoped(typeof(IRepository<>), typeof(CassandraRepository<>));
-
-            services.AddControllers(options => { options.Filters.Add<RequestExceptionFilter>(); })
-                    .AddNewtonsoftJson(options => options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore)
-                    .AddXmlSerializerFormatters()
-                    .AddXmlDataContractSerializerFormatters();
-
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lab2.Warehouse", Version = "v1" }); });
+            services.AddInstallersFromAssemblyContaining<IWarehouseMarker>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -6,10 +6,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="DistributedResponseCachingMiddleware" Version="3.0.2"/>
-        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1"/>
-        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3"/>
+        <PackageReference Include="DistributedResponseCachingMiddleware" Version="3.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="5.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Lab2.Shared\Lab2.Shared.csproj" />
     </ItemGroup>
 
 </Project>

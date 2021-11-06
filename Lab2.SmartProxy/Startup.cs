@@ -1,3 +1,4 @@
+using Lab2.Shared.ServiceInstaller.Extensions;
 using Lab2.SmartProxy.Cache;
 using Lab2.SmartProxy.Proxy;
 using Microsoft.AspNetCore.Builder;
@@ -17,14 +18,7 @@ namespace Lab2.SmartProxy {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
-            var cacheConfig       = Configuration.GetSection("Cache").Get<CacheConfig>();
-            var proxyCacheProfile = new CacheProfile { VaryByHeader = "Accept", Duration = cacheConfig.MaxAge };
-
-            services.AddControllers()
-                    .AddMvcOptions(options => options.CacheProfiles.Add("proxy", proxyCacheProfile));
-            services.AddProxy(Configuration);
-            services.AddDistributedCache(Configuration);
-            services.AddDistributedResponseCaching();
+            services.AddInstallersFromAssemblyContaining<ISmartProxyMarker>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
