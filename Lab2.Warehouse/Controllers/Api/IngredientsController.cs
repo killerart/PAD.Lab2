@@ -43,13 +43,13 @@ namespace Lab2.Warehouse.Controllers.Api {
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> DeleteAsync(Guid id, CancellationToken ct) {
+        public async Task<ActionResult> DeleteAsync(Guid id) {
             await _ingredients.DeleteByIdAsync(id);
             return Ok();
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<ActionResult<Ingredient>> PutAsync(Guid id, PutIngredientModel putIngredientModel, CancellationToken ct) {
+        public async Task<ActionResult<Ingredient>> PutAsync(Guid id, PutIngredientModel putIngredientModel) {
             var ingredient = putIngredientModel.Adapt<Ingredient>();
             ingredient.Id = id;
             await _ingredients.UpdateByIdAsync(id, IngredientMapping.UpdateExpression(ingredient));
@@ -57,7 +57,7 @@ namespace Lab2.Warehouse.Controllers.Api {
         }
 
         [HttpPatch("{id:guid}")]
-        public async Task<ActionResult<Ingredient>> PatchAsync(Guid id, JsonPatchDocument<Ingredient> patchDocument, CancellationToken ct) {
+        public async Task<ActionResult<Ingredient>> PatchAsync(Guid id, JsonPatchDocument<Ingredient> patchDocument) {
             var ingredient = await _ingredients.GetByIdAsync(id);
             patchDocument.ApplyTo(ingredient);
             await _ingredients.UpdateByIdAsync(id, IngredientMapping.UpdateExpression(ingredient));
