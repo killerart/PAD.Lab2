@@ -1,9 +1,6 @@
 using Lab2.Shared.ServiceInstaller.Extensions;
-using Lab2.SmartProxy.Cache;
-using Lab2.SmartProxy.Proxy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
