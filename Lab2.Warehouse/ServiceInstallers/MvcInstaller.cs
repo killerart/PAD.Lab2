@@ -1,5 +1,5 @@
 ﻿using Lab2.Shared.ServiceInstaller;
-using Lab2.Warehouse.Filters.ExceptionFilters;
+using Lab2.Warehouse.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;

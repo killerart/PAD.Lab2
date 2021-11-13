@@ -1,16 +1,8 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Lab2.Warehouse.Entities.Abstractions;
+using Lab2.Warehouse.Domain.Entities;
 
-namespace Lab2.Warehouse.Entities {
-    public class Ingredient : Entity {
-        public string Name     { get; set; }
-        public float  Calories { get; set; }
-        public float  Fats     { get; set; }
-        public float  Carbs    { get; set; }
-        public float  Protein  { get; set; }
-    }
-
+namespace Lab2.Warehouse.Infrastructure.Mappings {
     public class IngredientMapping : Cassandra.Mapping.Mappings {
         public IngredientMapping() {
             For<Ingredient>()

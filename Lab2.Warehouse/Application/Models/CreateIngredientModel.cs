@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Lab2.Warehouse.Models {
+namespace Lab2.Warehouse.Application.Models {
     public class CreateIngredientModel {
         [Required]
         public string Name { get; set; }
 
         [Required]
-        [Range(0, float.MaxValue)]
         public float Calories { get; set; }
 
         [Required]

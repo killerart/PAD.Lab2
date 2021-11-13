@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 using Cassandra;
 using Cassandra.Data.Linq;
 using Lab2.Shared.Exceptions;
-using Lab2.Warehouse.Entities.Abstractions;
-using Lab2.Warehouse.Repositories.Abstractions;
+using Lab2.Warehouse.Core;
+using Lab2.Warehouse.Domain.Entities.Abstractions;
 
-namespace Lab2.Warehouse.Repositories {
-    public class CassandraRepository<TModel> : IRepository<TModel> where TModel : Entity {
+namespace Lab2.Warehouse.Infrastructure.Repositories {
+    public class CassandraRepository<TModel> : IRepository<TModel> where TModel : IEntity {
         private readonly Table<TModel> _table;
 
         public CassandraRepository(ISession session) {

@@ -2,7 +2,7 @@ using Lab2.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace Lab2.Warehouse.Filters.ExceptionFilters {
+namespace Lab2.Warehouse.Filters {
     public class RequestExceptionFilter : IExceptionFilter {
         public void OnException(ExceptionContext context) {
             context.Result = context.Exception switch {

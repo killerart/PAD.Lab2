@@ -1,3 +1,3 @@
-﻿namespace Lab2.Warehouse.Models {
+﻿namespace Lab2.Warehouse.Application.Models {
     public class PutIngredientModel : CreateIngredientModel { }
 }
