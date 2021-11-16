@@ -2,7 +2,6 @@
 using Cassandra.Mapping;
 using Lab2.Shared.ServiceInstaller;
 using Lab2.Warehouse.Core;
-using Lab2.Warehouse.Domain.Entities;
 using Lab2.Warehouse.Infrastructure.Mappings;
 using Lab2.Warehouse.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +15,7 @@ namespace Lab2.Warehouse.ServiceInstallers {
             var cluster = Cluster.Builder()
                                  .WithConnectionString(cassandraConnectionString)
                                  .Build();
-            var session = cluster.Connect("pad");
+            var session = cluster.Connect();
             services.AddSingleton<ISession>(session);
             services.AddScoped(typeof(IRepository<>), typeof(CassandraRepository<>));
         }

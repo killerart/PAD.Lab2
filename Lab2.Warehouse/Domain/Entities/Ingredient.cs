@@ -1,4 +1,4 @@
-﻿using Lab2.Warehouse.Domain.Entities.Abstractions;
+﻿using Lab2.Warehouse.Core;
 
 namespace Lab2.Warehouse.Domain.Entities {
     public class Ingredient : Entity {

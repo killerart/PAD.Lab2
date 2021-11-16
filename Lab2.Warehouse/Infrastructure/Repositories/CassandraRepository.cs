@@ -7,10 +7,9 @@ using Cassandra;
 using Cassandra.Data.Linq;
 using Lab2.Shared.Exceptions;
 using Lab2.Warehouse.Core;
-using Lab2.Warehouse.Domain.Entities.Abstractions;
 
 namespace Lab2.Warehouse.Infrastructure.Repositories {
-    public class CassandraRepository<TModel> : IRepository<TModel> where TModel : IEntity {
+    public class CassandraRepository<TModel> : IRepository<TModel> where TModel : Entity {
         private readonly Table<TModel> _table;
 
         public CassandraRepository(ISession session) {

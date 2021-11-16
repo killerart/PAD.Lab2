@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Lab2.Warehouse.Domain.Entities.Abstractions;
 
 namespace Lab2.Warehouse.Core {
-    public interface IRepository<TModel> where TModel : IEntity {
+    public interface IRepository<TModel> where TModel : Entity {
         Task<IEnumerable<TModel>> GetAllAsync();
 
         Task<TModel> GetByIdAsync(Guid  id);

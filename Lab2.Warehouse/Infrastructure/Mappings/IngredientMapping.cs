@@ -6,9 +6,7 @@ namespace Lab2.Warehouse.Infrastructure.Mappings {
     public class IngredientMapping : Cassandra.Mapping.Mappings {
         public IngredientMapping() {
             For<Ingredient>()
-                .TableName("ingredients")
-                .PartitionKey(i => i.Id)
-                .ClusteringKey(i => i.Id);
+                .TableName("ingredients");
         }
 
         public static Expression<Func<Ingredient, Ingredient>> UpdateExpression(Ingredient ingredient) =>
