@@ -33,9 +33,10 @@ namespace Lab2.Warehouse {
                     await next.Invoke();
                 });
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lab2.Warehouse v1"));
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lab2.Warehouse v1"));
 
             app.UseHttpsRedirection();
 
