@@ -25,7 +25,7 @@ namespace Lab2.Warehouse.ServiceInstallers {
                                  .WithSSL(options)
                                  .Build();
             var session = cluster.Connect();
-            services.AddSingleton<ISession>(session);
+            services.AddSingleton(session);
             services.AddScoped(typeof(IRepository<>), typeof(CassandraRepository<>));
         }
 
